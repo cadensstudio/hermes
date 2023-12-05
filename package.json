@@ -1,0 +1,11 @@
+{
+  "name": "hermes",
+  "version": "0.0.1",
+  "description": "A CLI tool to download optimized Google font files.",
+  "main": "hermes.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
