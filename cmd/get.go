@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
+	"os"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
+// extract font file path url from Google Fonts API JSON response
 type Font struct {
 	Items []struct {
 		Files struct {
@@ -27,7 +28,14 @@ var getCmd = &cobra.Command{
 	Short: "Download a specific font",
 	Long: `Donwload a specific Google font in web optimized WOFF2 format into the current directory by defualt.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		getFont()
+		// declare default font or grab from command args
+		var fontFamily = "Roboto"
+		if len(args) >= 1 && args[0] != "" {
+				fontFamily = args[0]
+		}
+
+		fontUrl := getFontUrl(fontFamily)
+		donwloadFont(fontFamily, fontUrl)
 	},
 }
 
@@ -45,20 +53,20 @@ func init() {
 	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func getFont() {
+func getFontUrl(fontFamily string) (fontUrl string) {
 	key:= viper.Get("GFONTS_KEY")
-	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=Roboto&capability=WOFF2&capability=VF"
+	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
 
 	// Make the GET request
-	response, err := http.Get(url)
+	res, err := http.Get(url)
 	if err != nil {
 		fmt.Println("Error making GET request:", err)
 		return
 	}
-	defer response.Body.Close()
+	defer res.Body.Close()
 
 	// Read the response body
-	body, err := io.ReadAll(response.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 		return
@@ -68,9 +76,36 @@ func getFont() {
 	err = json.Unmarshal(body, &font)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	// Print the response body
-	regularURL := font.Items[0].Files.Filepath
-	fmt.Println(regularURL)
+	fontUrl = font.Items[0].Files.Filepath
+	fmt.Println(fontUrl)
+	return fontUrl
+}
+
+func donwloadFont(fontFamily string, url string) {
+
+	filepath := fontFamily + ".woff2"
+
+	// Donwload the font
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	// Create the font file on the local system
+	out, err := os.Create(filepath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer out.Close()
+
+	// Write the downloaded file to local file
+	_, err = io.Copy(out, res.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(out.Name() + " successfully downloaded!")
 }
