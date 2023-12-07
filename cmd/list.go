@@ -6,14 +6,13 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List fonts according to specific paramters",
+	Short: "List available fonts filtered by popularity or style.",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
