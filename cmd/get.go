@@ -117,13 +117,15 @@ func donwloadFont(fontFamily string, url string) {
 func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 	fmt.Println(fontFamily)
 	// convert font input to lowercase
-	parsedFontFamily = cases.Lower(language.Und).String(fontFamily)
+	fontFamily = cases.Lower(language.Und).String(fontFamily)
 	// convert first letter of each word to uppercase
-	parsedFontFamily = cases.Title(language.Und).String(parsedFontFamily)
+	fontFamily = cases.Title(language.Und).String(fontFamily)
 	// replace spaces with + for url formatting
-	for _, char := range parsedFontFamily {
+	for _, char := range fontFamily {
 		if char == ' ' {
 			parsedFontFamily += "+"
+		} else {
+			parsedFontFamily += string(char)
 		}
 	}
 	return parsedFontFamily
