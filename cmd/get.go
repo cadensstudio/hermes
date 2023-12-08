@@ -26,12 +26,13 @@ type Font struct {
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
-	Use:   "get",
+	Use:   "get [FONT FAMILY] [FLAGS]",
 	Short: "Download web-optimized font files for a specified font family.",
-	Long: `Downloads the specified font family in the WOFF2 format. By defailt, if a single variable format is available, it will be downloaded; otherwise, each individual font weight file will be downloaded.`,
+	Long: `
+	Downloads the specified font family in the WOFF2 format.
+	By default, if a single variable format is available, it will be downloaded;
+	otherwise, each individual font weight file will be downloaded.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// declare default font or grab from command args
-		// var fontFamily = "Roboto"
 		if len(args) == 0 {
 			cmd.Help()
 		} else {
