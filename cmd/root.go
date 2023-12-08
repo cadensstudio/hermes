@@ -9,7 +9,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "hermes",
+	Use:   "hermes [COMMAND]",
 	Short: "Hermes simplifies font downloading from Google Fonts.",
 	Long: `
 Tailored for developers and designers, Hermes automates the process

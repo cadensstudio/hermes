@@ -29,9 +29,9 @@ var getCmd = &cobra.Command{
 	Use:   "get [FONT FAMILY] [FLAGS]",
 	Short: "Download web-optimized font files for a specified font family.",
 	Long: `
-	Downloads the specified font family in the WOFF2 format.
-	By default, if a single variable format is available, it will be downloaded;
-	otherwise, each individual font weight file will be downloaded.`,
+Downloads the specified font family in the WOFF2 format.
+By default, if a single variable format is available, it will be downloaded;
+otherwise, each individual font weight file will be downloaded.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
