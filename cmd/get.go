@@ -36,7 +36,11 @@ var getCmd = &cobra.Command{
 			fontFamily = args[0]
 		}
 
-		parsedFontFamily := parseFontFamily(fontFamily)
+		// convert font input to lowercase
+		parsedFontFamily := cases.Lower(language.Und).String(fontFamily)
+		// replace spaces with + for url formatting
+		parsedFontFamily = parseFontFamily(parsedFontFamily)
+		// convert first letter of each word to uppercase
 		parsedFontFamily = cases.Title(language.Und).String(parsedFontFamily)
 		fmt.Println(parsedFontFamily)
 
