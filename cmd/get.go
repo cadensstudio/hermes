@@ -36,12 +36,7 @@ var getCmd = &cobra.Command{
 			fontFamily = args[0]
 		}
 
-		// convert font input to lowercase
-		parsedFontFamily := cases.Lower(language.Und).String(fontFamily)
-		// replace spaces with + for url formatting
-		parsedFontFamily = parseFontFamily(parsedFontFamily)
-		// convert first letter of each word to uppercase
-		parsedFontFamily = cases.Title(language.Und).String(parsedFontFamily)
+		parsedFontFamily := parseFontFamily(fontFamily)
 		fmt.Println(parsedFontFamily)
 
 		fontUrl := getFontUrl(parsedFontFamily)
@@ -120,12 +115,15 @@ func donwloadFont(fontFamily string, url string) {
 }
 
 func parseFontFamily(fontFamily string) (parsedFontFamily string) {
-	for _, char := range fontFamily {
+	fmt.Println(fontFamily)
+	// convert font input to lowercase
+	parsedFontFamily = cases.Lower(language.Und).String(fontFamily)
+	// convert first letter of each word to uppercase
+	parsedFontFamily = cases.Title(language.Und).String(parsedFontFamily)
+	// replace spaces with + for url formatting
+	for _, char := range parsedFontFamily {
 		if char == ' ' {
-			// Replace space with "+"
 			parsedFontFamily += "+"
-		} else {
-			parsedFontFamily += string(char)
 		}
 	}
 	return parsedFontFamily
