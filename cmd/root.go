@@ -10,13 +10,16 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "hermes",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Hermes simplifies font downloading from Google Fonts.",
+	Long: `
+Tailored for developers and designers, Hermes automates the process
+of downloading web-optimized font files from Google Fonts.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Key Features:
+- Effortlessly download fonts in the highly efficient WOFF2 format, ideal for web use.
+- Automatic retrieval of variable font formats when available, ensuring flexibility in design.
+- Empower your web projects with the 'list' command, revealing the top 10 trending Google Fonts.
+- Expedites font acquisition, allowing developers to self-host fonts and significantly boost website load speeds.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

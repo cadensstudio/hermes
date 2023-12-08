@@ -27,20 +27,22 @@ type Font struct {
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Download a specific font",
-	Long: `Donwload a specific Google font in web optimized WOFF2 format into the current directory by defualt.`,
+	Short: "Download web-optimized font files for a specified font family.",
+	Long: `Downloads the specified font family in the WOFF2 format. By defailt, if a single variable format is available, it will be downloaded; otherwise, each individual font weight file will be downloaded.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// declare default font or grab from command args
-		var fontFamily = "Roboto"
-		if len(args) >= 1 && args[0] != "" {
-			fontFamily = args[0]
+		// var fontFamily = "Roboto"
+		if len(args) == 0 {
+			cmd.Help()
+		} else {
+			fontFamily := args[0]
+			parsedFontFamily := parseFontFamily(fontFamily)
+			fontUrl := getFontUrl(parsedFontFamily)
+			if len(fontUrl) >= 1 {
+				donwloadFont(parsedFontFamily, fontUrl)
+			}
 		}
 
-		parsedFontFamily := parseFontFamily(fontFamily)
-		fmt.Println(parsedFontFamily)
-
-		fontUrl := getFontUrl(parsedFontFamily)
-		donwloadFont(parsedFontFamily, fontUrl)
 	},
 }
 
@@ -65,33 +67,44 @@ func getFontUrl(fontFamily string) (fontUrl string) {
 	// Make the GET request
 	res, err := http.Get(url)
 	if err != nil {
-		fmt.Println("Error making GET request:", err)
+		fmt.Println("Error making web request:", err)
 		return
 	}
 	defer res.Body.Close()
 
-	// Read the response body
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println("Error reading response body:", err)
+	// check response and handle errors
+	if res.StatusCode == 200 {
+		// Read the response body
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			fmt.Println("Error reading response body:", err)
+			return
+		}
+	
+		// parse the response body into the Font object struct
+		var font Font
+		err = json.Unmarshal(body, &font)
+	
+		if err != nil {
+			fmt.Println("Error parsing json response", err)
+		}
+	
+		// grab the font url from the json response
+		fontUrl = font.Items[0].Files.Filepath
+		return fontUrl
+	} else if res.StatusCode == 400 {
+		fmt.Println("400: Could not complete request")
+		return
+	} else if res.StatusCode == 500 {
+		fmt.Println("500: Could not find specified font:", fontFamily)
+		return
+	} else {
+		fmt.Println("An unexpected error occured")
 		return
 	}
-
-	var font Font
-	err = json.Unmarshal(body, &font)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	// Print the response body
-	fontUrl = font.Items[0].Files.Filepath
-	fmt.Println(fontUrl)
-	return fontUrl
 }
 
 func donwloadFont(fontFamily string, url string) {
-	filepath := fontFamily + ".woff2"
-
 	// Donwload the font
 	res, err := http.Get(url)
 	if err != nil {
@@ -100,6 +113,7 @@ func donwloadFont(fontFamily string, url string) {
 	defer res.Body.Close()
 
 	// Create the font file on the local system
+	filepath := fontFamily + ".woff2"
 	out, err := os.Create(filepath)
 	if err != nil {
 		fmt.Println(err)
