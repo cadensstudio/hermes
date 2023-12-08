@@ -9,6 +9,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"golang.org/x/text/cases"
+  "golang.org/x/text/language"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -31,11 +33,15 @@ var getCmd = &cobra.Command{
 		// declare default font or grab from command args
 		var fontFamily = "Roboto"
 		if len(args) >= 1 && args[0] != "" {
-				fontFamily = args[0]
+			fontFamily = args[0]
 		}
 
-		fontUrl := getFontUrl(fontFamily)
-		donwloadFont(fontFamily, fontUrl)
+		parsedFontFamily := parseFontFamily(fontFamily)
+		parsedFontFamily = cases.Title(language.Und).String(parsedFontFamily)
+		fmt.Println(parsedFontFamily)
+
+		fontUrl := getFontUrl(parsedFontFamily)
+		donwloadFont(parsedFontFamily, fontUrl)
 	},
 }
 
@@ -85,7 +91,6 @@ func getFontUrl(fontFamily string) (fontUrl string) {
 }
 
 func donwloadFont(fontFamily string, url string) {
-
 	filepath := fontFamily + ".woff2"
 
 	// Donwload the font
@@ -108,4 +113,16 @@ func donwloadFont(fontFamily string, url string) {
 		fmt.Println(err)
 	}
 	fmt.Println(out.Name() + " successfully downloaded!")
+}
+
+func parseFontFamily(fontFamily string) (parsedFontFamily string) {
+	for _, char := range fontFamily {
+		if char == ' ' {
+			// Replace space with "+"
+			parsedFontFamily += "+"
+		} else {
+			parsedFontFamily += string(char)
+		}
+	}
+	return parsedFontFamily
 }
