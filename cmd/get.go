@@ -9,18 +9,25 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"golang.org/x/text/cases"
-  "golang.org/x/text/language"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
+
+// create Axes struct to handle extra key for variable fonts
+type Axes struct {
+	Tag   string `json:"tag"`
+	Start int    `json:"start"`
+	End   int    `json:"end"`
+}
 
 // extract font file path url from Google Fonts API JSON response
 type Font struct {
 	Items []struct {
-		Files struct {
-			Filepath string `json:"regular"`
-		} `json:"files"`
+		Files map[string]string `json:"files"`
+		Axes  []*Axes           `json:"axes,omitempty"`
 	} `json:"items"`
 }
 
@@ -61,8 +68,8 @@ func init() {
 	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func getFontUrl(fontFamily string) (fontUrl string) {
-	key:= viper.Get("GFONTS_KEY")
+func getFontUrl(fontFamily string) (fontFiles map[string]string) {
+	key := viper.Get("GFONTS_KEY")
 	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
 
 	// Make the GET request
@@ -81,18 +88,30 @@ func getFontUrl(fontFamily string) (fontUrl string) {
 			fmt.Println("Error reading response body:", err)
 			return
 		}
-	
+
 		// parse the response body into the Font object struct
 		var font Font
 		err = json.Unmarshal(body, &font)
-	
+
 		if err != nil {
 			fmt.Println("Error parsing json response", err)
 		}
-	
-		// grab the font url from the json response
-		fontUrl = font.Items[0].Files.Filepath
-		return fontUrl
+
+		// for _, axis := range font.Items[0].Axes {
+		// 	fmt.Printf("Tag: %s\n", axis.Tag)
+		// 	fmt.Printf("Start: %d\n", axis.Start)
+		// 	fmt.Printf("End: %d\n", axis.End)
+		// }
+		if len(font.Items[0].Axes) == 0 {
+			fmt.Println("Variable font file not available")
+			fmt.Println("Proceeding to download font files individually...")
+		} else {
+			fmt.Println("Variable font file found!")
+			fmt.Println("Proceeding to download variable font file(s)...")
+		}
+		// grab all font files from the json response
+		fontFiles = font.Items[0].Files
+		return fontFiles
 	} else if res.StatusCode == 400 {
 		fmt.Println("400: Could not complete request")
 		return
@@ -105,28 +124,34 @@ func getFontUrl(fontFamily string) (fontUrl string) {
 	}
 }
 
-func donwloadFont(fontFamily string, url string) {
-	// Donwload the font
-	res, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer res.Body.Close()
+func donwloadFont(fontFamily string, fontFiles map[string]string) {
+	for variant, url := range fontFiles {
+		// Make the GET request for each variant
+		res, err := http.Get(url)
+		if err != nil {
+			fmt.Println(err)
+			continue // Skip to the next variant if an error occurs
+		}
+		defer res.Body.Close()
 
-	// Create the font file on the local system
-	filepath := fontFamily + ".woff2"
-	out, err := os.Create(filepath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer out.Close()
+		// Create the font file on the local system
+		filepath := fmt.Sprintf("%s_%s.woff2", fontFamily, variant)
+		out, err := os.Create(filepath)
+		if err != nil {
+			fmt.Println(err)
+			continue // Skip to the next variant if an error occurs
+		}
+		defer out.Close()
 
-	// Write the downloaded file to local file
-	_, err = io.Copy(out, res.Body)
-	if err != nil {
-		fmt.Println(err)
+		// Write the downloaded file to the local file
+		_, err = io.Copy(out, res.Body)
+		if err != nil {
+			fmt.Println(err)
+			continue // Skip to the next variant if an error occurs
+		}
+
+		fmt.Printf("%s successfully downloaded!\n", filepath)
 	}
-	fmt.Println(out.Name() + " successfully downloaded!")
 }
 
 func parseFontFamily(fontFamily string) (parsedFontFamily string) {
