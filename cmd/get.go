@@ -155,7 +155,6 @@ func donwloadFont(fontFamily string, fontFiles map[string]string) {
 }
 
 func parseFontFamily(fontFamily string) (parsedFontFamily string) {
-	fmt.Println(fontFamily)
 	// convert font input to lowercase
 	fontFamily = cases.Lower(language.Und).String(fontFamily)
 	// convert first letter of each word to uppercase
