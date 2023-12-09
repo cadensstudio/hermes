@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"os"
 	"strconv"
 
@@ -20,8 +21,8 @@ import (
 // create Axes struct to handle extra key for variable fonts
 type Axes struct {
 	Tag   string `json:"tag"`
-	Start int    `json:"start"`
-	End   int    `json:"end"`
+	Start float64   `json:"start"`
+	End   float64    `json:"end"`
 }
 
 // extract font file path url from Google Fonts API JSON response
@@ -76,13 +77,15 @@ func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 	// convert first letter of each word to uppercase
 	fontFamily = cases.Title(language.Und).String(fontFamily)
 	// replace spaces with + for url formatting
-	for _, char := range fontFamily {
-		if char == ' ' {
-			parsedFontFamily += "+"
-		} else {
-			parsedFontFamily += string(char)
-		}
-	}
+	parsedFontFamily = strings.Replace(fontFamily, " ", "+", -1)
+	fmt.Println(parsedFontFamily)
+	// for _, char := range fontFamily {
+	// 	if char == ' ' {
+	// 		parsedFontFamily += "+"
+	// 	} else {
+	// 		parsedFontFamily += string(char)
+	// 	}
+	// }
 	return parsedFontFamily
 }
 
@@ -182,8 +185,10 @@ func printCssStrings(fontResponse Font, hasVariable bool) {
 		var endWeight string
 		for _, axis := range fontResponse.Items[0].Axes {
 			if axis.Tag == "wght" {
-				startWeight = strconv.Itoa(axis.Start)
-				endWeight = strconv.Itoa(axis.End)
+				// startWeight = strconv.Itoa(axis.Start)
+				startWeight = strconv.FormatFloat(axis.Start, 'f', -1, 64)
+				// endWeight = strconv.Itoa(axis.End.(int))
+				endWeight = strconv.FormatFloat(axis.End, 'f', -1, 64)
 			}
 		}
 		for _, variant := range fontResponse.Items[0].Variants {
