@@ -59,7 +59,8 @@ providing inspiration for your next project.`,
 				if i >= 10 {
 					break
 				}
-				fontUrl := "https://fonts.google.com/?query=" + font.Family
+				parsedFontFamily := parseFontFamily(font.Family)
+				fontUrl := "https://fonts.google.com/?query=" + parsedFontFamily
 				fmt.Println(font.Family + ": " + fontUrl)
 			}
 		} else if res.StatusCode == 400 {
