@@ -11,6 +11,7 @@ import (
 	"strings"
 	"os"
 	"strconv"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -65,6 +66,34 @@ func init() {
 
 	getCmd.PersistentFlags().StringVarP(&Dir, "dir", "d", "", "Directory to write font files to")
 	viper.BindPFlag("dir", getCmd.PersistentFlags().Lookup("dir"))
+	// Validate the dir flag
+	cobra.OnInitialize(validateDir)
+}
+
+func validateDir() {
+	if Dir != "" {
+		absPath, err := filepath.Abs(Dir)
+		if err != nil {
+			fmt.Println("Error converting path to absolute:", err)
+			os.Exit(1)
+		}
+
+		// Check if the directory exists
+		_, err = os.Stat(absPath)
+		if os.IsNotExist(err) {
+			fmt.Println("Error: The specified directory does not exist:", absPath)
+			os.Exit(1)
+		}
+
+		// Check if the specified path is a directory
+		if fileInfo, err := os.Stat(absPath); err != nil || !fileInfo.IsDir() {
+			fmt.Println("Error: The specified path is not a directory:", absPath)
+			os.Exit(1)
+		}
+
+		// Update the Dir variable with the absolute path
+		Dir = absPath
+	}
 }
 
 func parseFontFamily(fontFamily string) (parsedFontFamily string) {
@@ -84,8 +113,8 @@ func getFontUrl(fontFamily string) (fontResponse Font) {
 	// Make the GET request
 	res, err := http.Get(url)
 	if err != nil {
-		fmt.Println("Error making web request:", err)
-		return
+		fmt.Println("Error: failed to create connection to remote host", err)
+		os.Exit(1)
 	}
 	defer res.Body.Close()
 
@@ -94,25 +123,29 @@ func getFontUrl(fontFamily string) (fontResponse Font) {
 		// Read the response body
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
-			fmt.Println("Error reading response body:", err)
-			return
+			fmt.Println("Error: Could not read response body", err)
+			os.Exit(1)
 		}
 
 		// parse the response body into the Font object struct
 		var fontResponse Font
 		err = json.Unmarshal(body, &fontResponse)
 		if err != nil {
-			fmt.Println("Error parsing json response", err)
+			fmt.Println("Error: could not parse json response", err)
+			os.Exit(1)
 		}
 		return fontResponse
 	} else if res.StatusCode == 400 {
-		fmt.Println("400 Error: Could not complete request")
+		fmt.Println("Error: Could not complete request")
+		os.Exit(1)
 		return
 	} else if res.StatusCode == 500 {
-		fmt.Println("500 Error: Could not find specified font:", fontFamily)
+		fmt.Println("Error: Could not find specified font:", fontFamily)
+		os.Exit(1)
 		return
 	} else {
 		fmt.Println("An unexpected error occured")
+		os.Exit(1)
 		return
 	}
 }
@@ -146,12 +179,12 @@ func donwloadFont(fontResponse Font) {
 
 		// Create the font file on the local system
 		filePath := viper.GetString("dir")
-		// clean file path flag
-		if filePath[len(filePath)-1] == '/' {
-			filePath = filePath[:len(filePath)-1]
+		// clean file path flag to ensure trailing slash
+		if len(filePath) >= 1 && filePath[len(filePath)-1] != '/' {
+			filePath = filePath + string('/')
 		}
 		fileName := fmt.Sprintf("%s_%s.woff2", fontFamily, variant)
-		fullPath := filePath + "/" + fileName
+		fullPath := filePath + fileName
 		out, err := os.Create(fullPath)
 		if err != nil {
 			fmt.Println(err)
@@ -165,7 +198,7 @@ func donwloadFont(fontResponse Font) {
 			fmt.Println(err)
 			continue // Skip to the next variant if an error occurs
 		}
-		fmt.Printf("%s successfully downloaded to %s!\n", fileName, fullPath)
+		fmt.Printf("%s successfully downloaded to %s\n", fileName, fullPath)
 	}
 	fmt.Println("\nNext steps: Copy the following CSS rules wherever you would like to use your font!")
 	printCssConfig(fontResponse, hasVariable)
@@ -191,7 +224,7 @@ func printCssConfig(fontResponse Font, hasVariable bool) {
   font-family: '` + fontResponse.Items[0].Family + `';
   font-style: ` + variant + `;
   font-weight: ` + startWeight + `-` + endWeight + `;
-  src: url('./` + fontResponse.Items[0].Family + `_` + variant + `.woff2') format('woff2');
+  src: url('../path/to/` + fontResponse.Items[0].Family + `_` + variant + `.woff2') format('woff2');
 }`
 			fmt.Println(newCssString)
 		}
@@ -214,7 +247,7 @@ func printCssConfig(fontResponse Font, hasVariable bool) {
   font-family: '` + fontResponse.Items[0].Family + `';
   font-style: ` + fontStyle + `;
   font-weight: ` + fontWeight + `;
-  src: url('./` + fontResponse.Items[0].Family + `_` + variant + `.woff2') format('woff2');
+  src: url('../path/to/` + fontResponse.Items[0].Family + `_` + variant + `.woff2') format('woff2');
 }`
 			fmt.Println(newCssString)
 		}
