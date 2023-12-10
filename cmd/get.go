@@ -18,6 +18,9 @@ import (
 	"golang.org/x/text/language"
 )
 
+// flag variables
+var Dir string
+
 // create Axes struct to handle extra key for variable fonts
 type Axes struct {
 	Tag   string `json:"tag"`
@@ -37,7 +40,7 @@ type Font struct {
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
-	Use:   "get [FONT FAMILY] [FLAGS]",
+	Use:   "get [font]",
 	Short: "Download web-optimized font files for a specified font family.",
 	Long: `
 Download the specified font family in WOFF2 format.
@@ -60,15 +63,8 @@ otherwise, each individual font weight file will be downloaded in the current di
 func init() {
 	rootCmd.AddCommand(getCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	getCmd.PersistentFlags().StringVarP(&Dir, "dir", "d", "", "Directory to write font files to")
+	viper.BindPFlag("dir", getCmd.PersistentFlags().Lookup("dir"))
 }
 
 func parseFontFamily(fontFamily string) (parsedFontFamily string) {
@@ -78,14 +74,6 @@ func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 	fontFamily = cases.Title(language.Und).String(fontFamily)
 	// replace spaces with + for url formatting
 	parsedFontFamily = strings.Replace(fontFamily, " ", "+", -1)
-	fmt.Println(parsedFontFamily)
-	// for _, char := range fontFamily {
-	// 	if char == ' ' {
-	// 		parsedFontFamily += "+"
-	// 	} else {
-	// 		parsedFontFamily += string(char)
-	// 	}
-	// }
 	return parsedFontFamily
 }
 
@@ -157,8 +145,14 @@ func donwloadFont(fontResponse Font) {
 		defer res.Body.Close()
 
 		// Create the font file on the local system
-		filepath := fmt.Sprintf("%s_%s.woff2", fontFamily, variant)
-		out, err := os.Create(filepath)
+		filePath := viper.GetString("dir")
+		// clean file path flag
+		if filePath[len(filePath)-1] == '/' {
+			filePath = filePath[:len(filePath)-1]
+		}
+		fileName := fmt.Sprintf("%s_%s.woff2", fontFamily, variant)
+		fullPath := filePath + "/" + fileName
+		out, err := os.Create(fullPath)
 		if err != nil {
 			fmt.Println(err)
 			continue // Skip to the next variant if an error occurs
@@ -171,13 +165,13 @@ func donwloadFont(fontResponse Font) {
 			fmt.Println(err)
 			continue // Skip to the next variant if an error occurs
 		}
-		fmt.Printf("%s successfully downloaded!\n", filepath)
+		fmt.Printf("%s successfully downloaded to %s!\n", fileName, fullPath)
 	}
 	fmt.Println("\nNext steps: Copy the following CSS rules wherever you would like to use your font!")
-	printCssStrings(fontResponse, hasVariable)
+	printCssConfig(fontResponse, hasVariable)
 }
 
-func printCssStrings(fontResponse Font, hasVariable bool) {
+func printCssConfig(fontResponse Font, hasVariable bool) {
 	var newCssString string
 
 	if hasVariable {
