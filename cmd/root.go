@@ -5,8 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "hermes",
@@ -20,9 +18,6 @@ Key Features:
 - Automatic retrieval of variable font formats when available, ensuring flexibility in design.
 - Empower your web projects with the 'list' command, revealing the top 10 trending Google Fonts.
 - Expedites font acquisition, allowing developers to self-host fonts and significantly boost website load speeds.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

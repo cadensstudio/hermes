@@ -41,12 +41,11 @@ type Font struct {
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
-	Use:   "get [font]",
+	Use:   "get <font>",
 	Short: "Download web-optimized font files for a specified font family.",
-	Long: `
-Download the specified font family in WOFF2 format.
-By default, if a single variable format is available, it will be downloaded;
-otherwise, each individual font weight file will be downloaded in the current directory.`,
+	Long: `Download the specified font family in WOFF2 format.
+If a single variable format is available, it will be downloaded;
+otherwise, each individual font weight file will be downloaded.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
@@ -64,7 +63,7 @@ otherwise, each individual font weight file will be downloaded in the current di
 func init() {
 	rootCmd.AddCommand(getCmd)
 
-	getCmd.PersistentFlags().StringVarP(&Dir, "dir", "d", "", "Directory to write font files to")
+	getCmd.PersistentFlags().StringVarP(&Dir, "dir", "d", "", "Directory to write font files to (defaults to current directory)")
 	viper.BindPFlag("dir", getCmd.PersistentFlags().Lookup("dir"))
 	// Validate the dir flag
 	cobra.OnInitialize(validateDir)
