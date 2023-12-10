@@ -1,13 +1,23 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"io"
+	"net/http"
+	"os"
 )
+
+type FontList struct {
+	Items []struct {
+		Family string `json:"family"`
+	} `json:"items"`
+}
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
@@ -16,7 +26,51 @@ var listCmd = &cobra.Command{
 	Long: `Lists the 10 most trending Google Fonts,
 providing inspiration for your next project.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		key := viper.Get("GFONTS_KEY")
+		url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&sort=trending"
+
+		// Make the GET request
+		res, err := http.Get(url)
+		if err != nil {
+			fmt.Println("Error: failed to create connection to remote host", err)
+			os.Exit(1)
+		}
+		defer res.Body.Close()
+
+		// check response and handle errors
+		if res.StatusCode == 200 {
+			// Read the response body
+			body, err := io.ReadAll(res.Body)
+			if err != nil {
+				fmt.Println("Error: Could not read response body", err)
+				os.Exit(1)
+			}
+
+			// parse the response body into the FontList object struct
+			var listResponse FontList
+			err = json.Unmarshal(body, &listResponse)
+			if err != nil {
+				fmt.Println("Error: could not parse json response", err)
+				os.Exit(1)
+			}
+
+			// Grab the first 10 items
+			for i, font := range listResponse.Items {
+				if i >= 10 {
+					break
+				}
+				fontUrl := "https://fonts.google.com/?query=" + font.Family
+				fmt.Println(font.Family + ": " + fontUrl)
+			}
+		} else if res.StatusCode == 400 {
+			fmt.Println("Error: Could not complete request")
+			os.Exit(1)
+			return
+		} else {
+			fmt.Println("An unexpected error occured")
+			os.Exit(1)
+			return
+		}
 	},
 }
 

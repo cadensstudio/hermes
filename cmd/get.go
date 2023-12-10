@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"os"
-	"strconv"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -24,9 +24,9 @@ var Dir string
 
 // create Axes struct to handle extra key for variable fonts
 type Axes struct {
-	Tag   string `json:"tag"`
-	Start float64   `json:"start"`
-	End   float64    `json:"end"`
+	Tag   string  `json:"tag"`
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
 }
 
 // extract font file path url from Google Fonts API JSON response
@@ -42,7 +42,7 @@ type Font struct {
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get <font>",
-	Short: "Download web-optimized font files for a specified font family.",
+	Short: "Downloads web-optimized font files for a specified font family",
 	Long: `Download the specified font family in WOFF2 format.
 If a single variable format is available, it will be downloaded;
 otherwise, each individual font weight file will be downloaded.`,
