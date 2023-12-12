@@ -29,7 +29,8 @@ archives:
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_v{{ .Version }}_
-      {{- title .Os }}_
+      {{- if eq title .Os "darwin" }}macOS_
+      {{- else }}{{ title .Os }}_{{ end }}
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
