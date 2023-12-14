@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"github.com/manifoldco/promptui"
 )
 
 // flag variables
@@ -104,6 +105,10 @@ func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 
 func getFontUrl(fontFamily string) (fontResponse Font) {
 	key := viper.Get("GFONTS_KEY")
+	if key == nil {
+		key = getApiKey()
+	}
+
 	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
 
 	// Make the GET request
@@ -248,4 +253,16 @@ func printCssConfig(fontResponse Font, hasVariable bool) {
 			fmt.Println(newCssString)
 		}
 	}
+}
+
+func getApiKey() (string) {
+	prompt := promptui.Prompt{
+		Label:    "Please enter your API Key (found here: https://console.cloud.google.com/apis/credentials):",
+	}
+	result, err := prompt.Run()
+	if err != nil {
+		fmt.Printf("There was an error processing your response: %v\n", err)
+		os.Exit(1)
+	}
+	return result
 }
