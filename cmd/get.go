@@ -104,8 +104,12 @@ func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 }
 
 func getFontUrl(fontFamily string) (fontResponse Font) {
+	// try reading key from .env
 	key := viper.Get("GFONTS_KEY")
 	if key == nil {
+		// try reading key from os environment
+		key = os.Getenv("GFONTS_KEY")
+		// get key using user prompt
 		key = getApiKey()
 	}
 
@@ -256,13 +260,26 @@ func printCssConfig(fontResponse Font, hasVariable bool) {
 }
 
 func getApiKey() (string) {
-	prompt := promptui.Prompt{
-		Label:    "Please enter your API Key (found here: https://console.cloud.google.com/apis/credentials):",
+	keyPrompt := promptui.Prompt{
+		Label:    "Please enter your API Key (found here: https://console.cloud.google.com/apis/credentials)",
 	}
-	result, err := prompt.Run()
+	keyResult, err := keyPrompt.Run()
 	if err != nil {
 		fmt.Printf("There was an error processing your response: %v\n", err)
 		os.Exit(1)
 	}
-	return result
+
+	exportPrompt := promptui.Select{
+		Label: "Would you like to export this key for use in future runs?",
+		Items: []string{"Yes", "No"},
+	}
+	_, exportResult, err := exportPrompt.Run()
+	if err != nil {
+		fmt.Printf("There was an error processing your response: %v\n", err)
+		os.Exit(1)
+	}
+	if exportResult == "Yes" {
+		os.Setenv("GFONTS_KEY", keyResult)
+	}
+	return keyResult
 }

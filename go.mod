@@ -3,6 +3,7 @@ module github.com/cadensstudio/hermes
 go 1.21.4
 
 require (
+	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.0
 	golang.org/x/text v0.14.0
@@ -14,7 +15,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
