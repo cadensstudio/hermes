@@ -14,7 +14,7 @@ Hermes is a command-line interface (CLI) application built in Go that simplifies
 
 ### Prerequisites
 
-Hermes requires a Google Fonts API Key to run commands. Obtain your key [here](https://console.cloud.google.com/apis/credentials){:target="_blank"}.
+Hermes requires a Google Fonts API Key to run commands. Obtain your key [here](https://console.cloud.google.com/apis/credentials).
 
 ### Installation
 
