@@ -258,10 +258,3 @@ func printCssConfig(fontResponse Font, hasVariable bool) {
 		}
 	}
 }
-
-func getApiKey() (apiKey string) {
-	fmt.Println("Please enter your Google Fonts API Key (found here: https://console.cloud.google.com/apis/credentials): ")
-	fmt.Scanf("%s", &apiKey)
-
-	return apiKey
-}
