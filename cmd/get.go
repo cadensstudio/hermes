@@ -103,7 +103,15 @@ func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 }
 
 func getFontUrl(fontFamily string) (fontResponse Font) {
+	// try reading key from .env
 	key := viper.Get("GFONTS_KEY")
+	if key == nil {
+		// try reading key from os environment
+		key = os.Getenv("GFONTS_KEY")
+		// get key using user prompt
+		key = getApiKey()
+	}
+
 	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
 
 	// Make the GET request
@@ -132,7 +140,7 @@ func getFontUrl(fontFamily string) (fontResponse Font) {
 		}
 		return fontResponse
 	} else if res.StatusCode == 400 {
-		fmt.Println("Error: Could not complete request")
+		fmt.Println("Error: Invalid API Key")
 		os.Exit(1)
 		return
 	} else if res.StatusCode == 500 {
@@ -248,4 +256,11 @@ func printCssConfig(fontResponse Font, hasVariable bool) {
 			fmt.Println(newCssString)
 		}
 	}
+}
+
+func getApiKey() (apiKey string) {
+	fmt.Println("Please enter your Google Fonts API Key (found here: https://console.cloud.google.com/apis/credentials): ")
+	fmt.Scanf("%s", &apiKey)
+
+	return apiKey
 }
