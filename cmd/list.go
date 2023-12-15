@@ -23,7 +23,16 @@ var listCmd = &cobra.Command{
 	Long: `Lists the 10 most trending Google Fonts,
 providing inspiration for your next project.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// try grabbing key from .env file, if it exists
 		key := viper.Get("GFONTS_KEY")
+		if key == nil {	
+			// if no .env, grab key from cmd flag
+			key = viper.GetString("key")
+			if len(fmt.Sprint(key)) < 1 {
+				fmt.Println(`Error: required flag "key" not set`)
+				os.Exit(1)
+			}
+		}
 		url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&sort=trending"
 
 		// Make the GET request
@@ -74,4 +83,7 @@ providing inspiration for your next project.`,
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+
+	listCmd.PersistentFlags().StringVarP(&ApiKey, "key", "k", "", "Your Google Fonts API Key")
+	viper.BindPFlag("key", listCmd.PersistentFlags().Lookup("key"))
 }

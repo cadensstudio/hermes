@@ -18,7 +18,6 @@ import (
 
 // flag variables
 var Dir string
-var ApiKey string
 
 // create Axes struct to handle extra key for variable fonts
 type Axes struct {
@@ -104,10 +103,15 @@ func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 }
 
 func getFontUrl(fontFamily string) (fontResponse Font) {
-	key := viper.GetString("key")
-	if len(key) < 1 {
-		fmt.Println(`Error: required flag "key" not set`)
-		os.Exit(1)
+	// try grabbing key from .env file, if it exists
+	key := viper.Get("GFONTS_KEY")
+	if key == nil {	
+		// if no .env, grab key from cmd flag
+		key = viper.GetString("key")
+		if len(fmt.Sprint(key)) < 1 {
+			fmt.Println(`Error: required flag "key" not set`)
+			os.Exit(1)
+		}
 	}
 
 	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
