@@ -84,6 +84,6 @@ providing inspiration for your next project.`,
 func init() {
 	rootCmd.AddCommand(listCmd)
 
-	listCmd.PersistentFlags().StringVarP(&ApiKey, "key", "k", "", "Your Google Fonts API Key")
+	listCmd.PersistentFlags().StringVarP(&ApiKey, "key", "k", "", "Your Google Fonts API Key (https://console.cloud.google.com/apis/credentials)")
 	viper.BindPFlag("key", listCmd.PersistentFlags().Lookup("key"))
 }

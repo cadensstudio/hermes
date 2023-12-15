@@ -60,7 +60,7 @@ func init() {
 
 	getCmd.PersistentFlags().StringVarP(&Dir, "dir", "d", "", "Directory to write font files to (defaults to current directory)")
 	viper.BindPFlag("dir", getCmd.PersistentFlags().Lookup("dir"))
-	getCmd.PersistentFlags().StringVarP(&ApiKey, "key", "k", "", "Your Google Fonts API Key")
+	getCmd.PersistentFlags().StringVarP(&ApiKey, "key", "k", "", "Your Google Fonts API Key (https://console.cloud.google.com/apis/credentials)")
 	viper.BindPFlag("key", getCmd.PersistentFlags().Lookup("key"))
 	// Validate the dir flag
 	cobra.OnInitialize(validateDir)
