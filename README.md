@@ -14,7 +14,7 @@ Hermes is a command-line interface (CLI) application built in Go that simplifies
 
 ### Prerequisites
 
-Hermes requires a Google Fonts API Key to run commands. Obtain your key [here](https://console.cloud.google.com/apis/credentials).
+Hermes requires a Google Fonts API Key to run commands. Obtain your key [here](https://console.cloud.google.com/apis/credentials){:target="_blank"}.
 
 ### Installation
 
@@ -41,7 +41,7 @@ Contributions to Hermes are welcome! Feel free to open issues, submit pull reque
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/hermes.git
+    git clone https://github.com/cadensstudio/hermes.git
     ```
 
 2. Navigate to the project directory:
