@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"github.com/manifoldco/promptui"
 )
 
 // flag variables
@@ -141,7 +140,7 @@ func getFontUrl(fontFamily string) (fontResponse Font) {
 		}
 		return fontResponse
 	} else if res.StatusCode == 400 {
-		fmt.Println("Error: Could not complete request")
+		fmt.Println("Error: Invalid API Key")
 		os.Exit(1)
 		return
 	} else if res.StatusCode == 500 {
@@ -259,27 +258,9 @@ func printCssConfig(fontResponse Font, hasVariable bool) {
 	}
 }
 
-func getApiKey() (string) {
-	keyPrompt := promptui.Prompt{
-		Label:    "Please enter your API Key (found here: https://console.cloud.google.com/apis/credentials)",
-	}
-	keyResult, err := keyPrompt.Run()
-	if err != nil {
-		fmt.Printf("There was an error processing your response: %v\n", err)
-		os.Exit(1)
-	}
+func getApiKey() (apiKey string) {
+	fmt.Println("Please enter your Google Fonts API Key (found here: https://console.cloud.google.com/apis/credentials): ")
+	fmt.Scanf("%s", &apiKey)
 
-	exportPrompt := promptui.Select{
-		Label: "Would you like to export this key for use in future runs?",
-		Items: []string{"Yes", "No"},
-	}
-	_, exportResult, err := exportPrompt.Run()
-	if err != nil {
-		fmt.Printf("There was an error processing your response: %v\n", err)
-		os.Exit(1)
-	}
-	if exportResult == "Yes" {
-		os.Setenv("GFONTS_KEY", keyResult)
-	}
-	return keyResult
+	return apiKey
 }
