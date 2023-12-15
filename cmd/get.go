@@ -18,7 +18,7 @@ import (
 
 // flag variables
 var Dir string
-var Key string
+var ApiKey string
 
 // create Axes struct to handle extra key for variable fonts
 type Axes struct {
@@ -61,6 +61,8 @@ func init() {
 
 	getCmd.PersistentFlags().StringVarP(&Dir, "dir", "d", "", "Directory to write font files to (defaults to current directory)")
 	viper.BindPFlag("dir", getCmd.PersistentFlags().Lookup("dir"))
+	getCmd.PersistentFlags().StringVarP(&ApiKey, "key", "k", "", "Your Google Fonts API Key")
+	viper.BindPFlag("key", getCmd.PersistentFlags().Lookup("key"))
 	// Validate the dir flag
 	cobra.OnInitialize(validateDir)
 }
@@ -102,17 +104,13 @@ func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 }
 
 func getFontUrl(fontFamily string) (fontResponse Font) {
-	// try reading key from .env
-	key := viper.Get("GFONTS_KEY")
-	if key == nil {
-		// try reading key from os environment
-		key = os.Getenv("GFONTS_KEY")
-		// get key using user prompt
-		key = getApiKey()
+	key := viper.GetString("key")
+	if len(key) < 1 {
+		fmt.Println(`Error: required flag "key" not set`)
+		os.Exit(1)
 	}
 
 	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
-
 	// Make the GET request
 	res, err := http.Get(url)
 	if err != nil {
@@ -139,11 +137,11 @@ func getFontUrl(fontFamily string) (fontResponse Font) {
 		}
 		return fontResponse
 	} else if res.StatusCode == 400 {
-		fmt.Println("Error: Invalid API Key")
+		fmt.Println("Error: invalid API Key")
 		os.Exit(1)
 		return
 	} else if res.StatusCode == 500 {
-		fmt.Println("Error: Could not find specified font:", fontFamily)
+		fmt.Println("Error: could not find specified font:", fontFamily)
 		os.Exit(1)
 		return
 	} else {

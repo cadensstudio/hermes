@@ -1,4 +1,5 @@
 .env
 hermes
+*.woff2
 
 dist/
