@@ -18,6 +18,7 @@ import (
 
 // flag variables
 var Dir string
+var Key string
 
 // create Axes struct to handle extra key for variable fonts
 type Axes struct {
@@ -40,9 +41,7 @@ type Font struct {
 var getCmd = &cobra.Command{
 	Use:   "get <font>",
 	Short: "Downloads web-optimized font files for a specified font family",
-	Long: `Download the specified font family in WOFF2 format.
-If a single variable format is available, it will be downloaded;
-otherwise, each individual font weight file will be downloaded.`,
+	Long: `Download the specified font family in WOFF2 format.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()

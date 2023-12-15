@@ -8,16 +8,10 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "hermes",
-	Short: "Hermes simplifies font downloading from Google Fonts.",
-	Long: `
-Tailored for developers and designers, Hermes automates the process
-of downloading web-optimized font files from Google Fonts.
-
-Key Features:
-- Effortlessly download fonts in the highly efficient WOFF2 format, ideal for web use.
-- Automatic retrieval of variable font formats when available, ensuring flexibility in design.
-- Empower your web projects with the 'list' command, revealing the top 10 trending Google Fonts.
-- Expedites font acquisition, allowing developers to self-host fonts and significantly boost website load speeds.`,
+	Short: "Hermes simplifies the process of downloading Google Font files.",
+	Long: `Hermes simplifies the process of downloading web-optimized Google Font files
+in the WOFF2 format and generates the necessary CSS code to easily integrate
+the downloaded fonts into your project.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
