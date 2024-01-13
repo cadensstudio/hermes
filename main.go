@@ -6,8 +6,6 @@ import (
 )
 
 func main() {
-	viper.SetConfigFile(".env")
-	viper.ReadInConfig()
-
+	viper.AutomaticEnv()
 	cmd.Execute()
 }

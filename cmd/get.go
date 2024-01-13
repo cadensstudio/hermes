@@ -60,8 +60,6 @@ func init() {
 
 	getCmd.PersistentFlags().StringVarP(&Dir, "dir", "d", "", "Directory to write font files to (defaults to current directory)")
 	viper.BindPFlag("dir", getCmd.PersistentFlags().Lookup("dir"))
-	getCmd.PersistentFlags().StringVarP(&ApiKey, "key", "k", "", "Your Google Fonts API Key (https://console.cloud.google.com/apis/credentials)")
-	viper.BindPFlag("key", getCmd.PersistentFlags().Lookup("key"))
 	// Validate the dir flag
 	cobra.OnInitialize(validateDir)
 }
@@ -103,15 +101,10 @@ func parseFontFamily(fontFamily string) (parsedFontFamily string) {
 }
 
 func getFontUrl(fontFamily string) (fontResponse Font) {
-	// try grabbing key from .env file, if it exists
 	key := viper.Get("GFONTS_KEY")
-	if key == nil {	
-		// if no .env, grab key from cmd flag
-		key = viper.GetString("key")
-		if len(fmt.Sprint(key)) < 1 {
-			fmt.Println(`Error: required flag "key" not set`)
-			os.Exit(1)
-		}
+	if key == nil {
+		fmt.Println(`Error: required variable "GFONTS_KEY" not found. Get a key at: https://console.cloud.google.com/apis/credentials`)
+		os.Exit(1)
 	}
 
 	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
