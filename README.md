@@ -1,5 +1,7 @@
 ![hermes](https://github.com/cadensstudio/hermes/assets/54109914/b040715a-d2b6-4416-ab97-6050ab6a9f1a)
 
+# Hermes - Instantly Download Google Fonts
+
 Hermes is a command-line interface (CLI) application built in Go that accelerates the process of downloading web-optimized Google Font files in the WOFF2 format. Hermes takes an opinionated approach by downloading variable font files, if available. Otherwise, Hermes downloads each individual font weight file separately. Additionally, Hermes generates the necessary CSS code to easily integrate the downloaded fonts into your project.
 
 ## Features
