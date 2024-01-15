@@ -2,4 +2,5 @@
 hermes
 *.woff2
 
+.DS_Store
 dist/
