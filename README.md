@@ -1,4 +1,4 @@
-![hermes](https://github.com/cadensstudio/hermes/assets/54109914/b040715a-d2b6-4416-ab97-6050ab6a9f1a)
+![hermes-logo](https://github.com/cadensstudio/hermes/assets/54109914/d1567391-5807-4764-b5a7-fef9ee372f95)
 
 ---
 
