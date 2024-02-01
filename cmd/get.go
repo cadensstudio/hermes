@@ -12,12 +12,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
-// flag variables
+// global variables
 var Dir string
+var Key string
 
 // create Axes struct to handle extra key for variable fonts
 type Axes struct {
@@ -45,6 +44,14 @@ var getCmd = &cobra.Command{
 		if len(args) == 0 {
 			cmd.Help()
 		} else {
+			storedKey := viper.Get("GFONTS_KEY")
+			if storedKey == nil {
+				fmt.Println(`Error: required variable "GFONTS_KEY" not found. Get a key at: https://console.cloud.google.com/apis/credentials`)
+				os.Exit(1)
+			}
+			// convert read in key to a string
+			Key = fmt.Sprint(storedKey)
+			// getAllFonts()
 			fontFamily := args[0]
 			parsedFontFamily := parseFontFamily(fontFamily)
 			fontResponse := getFontUrl(parsedFontFamily)
@@ -90,24 +97,68 @@ func validateDir() {
 	}
 }
 
-func parseFontFamily(fontFamily string) (parsedFontFamily string) {
-	// convert font input to lowercase
-	fontFamily = cases.Lower(language.Und).String(fontFamily)
-	// convert first letter of each word to uppercase
-	fontFamily = cases.Title(language.Und).String(fontFamily)
+func getAllFonts() (map[string]string, error) {
+	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + Key
+	// Make the GET request
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error: failed to create connection to remote host", err)
+		os.Exit(1)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("Error fetching data from remote host: %d", res.StatusCode)
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error: Could not read response body", err)
+		os.Exit(1)
+	}
+
+	// parse the response body into the Font object struct
+	var allFonts FontList
+	err = json.Unmarshal(body, &allFonts)
+	if err != nil {
+		fmt.Println("Error: could not parse json response", err)
+		os.Exit(1)
+	}
+
+	// Map to store the correctly capitalized font names, with lowercase as the key.
+	mappedFontFamilies := make(map[string]string)
+	for _, font := range allFonts.Items {
+		lowercaseName := strings.ToLower(font.Family)
+		mappedFontFamilies[lowercaseName] = font.Family
+	}
+
+	return mappedFontFamilies, nil
+}
+
+func parseFontFamily(inputtedFont string) (parsedFontFamily string) {
+	mappedFontFamilies, err := getAllFonts()
+	if err != nil {
+    fmt.Println("Error fetching fonts:", err)
+    os.Exit(1)
+	}
+
+	var tempFont string
+	correctFont, exists := mappedFontFamilies[strings.ToLower(inputtedFont)]
+	if exists {
+		tempFont = correctFont
+	} else {
+		tempFont = inputtedFont
+	}
+
 	// replace spaces with + for url formatting
-	parsedFontFamily = strings.Replace(fontFamily, " ", "+", -1)
+	parsedFontFamily = strings.Replace(tempFont, " ", "+", -1)
+	fmt.Println(parsedFontFamily)
 	return parsedFontFamily
 }
 
 func getFontUrl(fontFamily string) (fontResponse Font) {
-	key := viper.Get("GFONTS_KEY")
-	if key == nil {
-		fmt.Println(`Error: required variable "GFONTS_KEY" not found. Get a key at: https://console.cloud.google.com/apis/credentials`)
-		os.Exit(1)
-	}
-
-	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + fmt.Sprint(key) + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
+	url := "https://www.googleapis.com/webfonts/v1/webfonts?key=" + Key + "&family=" + fontFamily + "&capability=WOFF2&capability=VF"
 	// Make the GET request
 	res, err := http.Get(url)
 	if err != nil {
